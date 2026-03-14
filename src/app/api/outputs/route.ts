@@ -71,64 +71,34 @@ function scanDir(dir: string, base: string, agentId: AgentName, agentName: strin
   return results
 }
 
-async function fetchNelsonOutputs(): Promise<OutputFile[]> {
-  if (!NELSON_GATEWAY_URL) return []
-  const results: OutputFile[] = []
+// Nelson file server (runs on Nelson:3001) — serves workspace files over HTTP
+const NELSON_FILE_SERVER = process.env.NELSON_FILE_SERVER_URL || 'http://192.168.7.6:3001'
 
-  for (const ws of NELSON_WORKSPACES) {
-    try {
-      // Use exec via gateway to list files recursively
-      const body = JSON.stringify({
-        tool: 'exec',
-        args: {
-          command: `powershell -Command "Get-ChildItem '${ws.dir}' -Recurse -File | Where-Object { $_.Extension -in '.md','.txt','.json','.pdf','.docx','.csv' -and $_.Name -notin @('AGENTS.md','SOUL.md','USER.md','IDENTITY.md','HEARTBEAT.md','BOOTSTRAP.md','TOOLS.md') -and $_.FullName -notmatch 'node_modules|.git|.next|tmp' } | Select-Object Name, @{n='RelPath';e={$_.FullName.Replace('${ws.dir}\\','').Replace('\\','/')}}, Extension, @{n='SizeKb';e={[Math]::Round($_.Length/1024)}}, @{n='ModifiedAt';e={[DateTimeOffset]::new($_.LastWriteTime).ToUnixTimeMilliseconds()}} | ConvertTo-Json"`,
-        },
-        agentId: 'main',
-      })
+async function fetchNelsonOutputs(agentFilter?: AgentName | null): Promise<OutputFile[]> {
+  try {
+    const params = new URLSearchParams()
+    if (agentFilter) params.set('agent', agentFilter)
 
-      const res = await fetch(`${NELSON_GATEWAY_URL}/tools/invoke`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(NELSON_TOKEN ? { Authorization: `Bearer ${NELSON_TOKEN}` } : {}),
-        },
-        body,
-        signal: AbortSignal.timeout(10000),
-      })
+    const res = await fetch(`${NELSON_FILE_SERVER}/files?${params}`, {
+      headers: {
+        Authorization: `Bearer ${NELSON_TOKEN}`,
+      },
+      signal: AbortSignal.timeout(8000),
+    })
 
-      if (!res.ok) continue
-      const envelope = await res.json()
-      if (!envelope.ok) continue
+    if (!res.ok) return []
+    const data = await res.json()
 
-      const text = envelope.result?.content?.find((c: { type: string }) => c.type === 'text')?.text
-      if (!text) continue
-
-      // The exec tool wraps output — extract the actual stdout
-      let jsonText = text
-      // Try to find JSON array or object in the output
-      const jsonMatch = text.match(/(\[[\s\S]*\]|\{[\s\S]*\})/m)
-      if (jsonMatch) jsonText = jsonMatch[1]
-
-      const files = JSON.parse(jsonText)
-      const fileArr = Array.isArray(files) ? files : [files]
-
-      for (const f of fileArr) {
-        if (!f?.Name || !f?.RelPath) continue
-        results.push({
-          name: f.Name,
-          path: f.RelPath,
-          agentId: ws.agentId,
-          agentName: ws.agentName,
-          ext: (f.Extension || '').toLowerCase(),
-          sizeKb: f.SizeKb || 0,
-          modifiedAt: f.ModifiedAt || 0,
-          source: 'remote',
-        })
-      }
-    } catch { /* skip this workspace */ }
+    return (data.files || []).map((f: {
+      name: string; path: string; agentId: string; agentName: string;
+      ext: string; sizeKb: number; modifiedAt: number
+    }) => ({
+      ...f,
+      source: 'remote' as const,
+    }))
+  } catch {
+    return []
   }
-
-  return results
 }
 
 export async function GET(request: NextRequest) {
@@ -143,11 +113,9 @@ export async function GET(request: NextRequest) {
     localFiles.push(...scanDir(ws.dir, ws.dir, ws.agentId, ws.agentName))
   }
 
-  // Fetch Nelson workspaces via gateway
-  const nelsonFiles = await fetchNelsonOutputs()
-  const filteredNelson = agentFilter
-    ? nelsonFiles.filter(f => f.agentId === agentFilter)
-    : nelsonFiles
+  // Fetch Nelson workspaces via file server
+  const nelsonFiles = await fetchNelsonOutputs(agentFilter)
+  const filteredNelson = nelsonFiles
 
   let allFiles = [...localFiles, ...filteredNelson]
 

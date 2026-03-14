@@ -9,6 +9,11 @@ const WORKSPACE_ROOTS: Record<string, string> = {
   archer: 'C:\\Users\\Bob\\.openclaw\\workspace-archer',
 }
 
+// Agents served by Nelson's file server
+const NELSON_AGENTS = new Set(['nelson', 'terry', 'reacher', 'archer'])
+const NELSON_FILE_SERVER = process.env.NELSON_FILE_SERVER_URL || 'http://192.168.7.6:3001'
+const NELSON_TOKEN = process.env.NELSON_GATEWAY_TOKEN || ''
+
 const MIME_TYPES: Record<string, string> = {
   '.md': 'text/markdown',
   '.txt': 'text/plain',
@@ -26,6 +31,29 @@ export async function GET(request: NextRequest) {
 
   if (!agentId || !filePath) {
     return NextResponse.json({ error: 'Missing agent or path' }, { status: 400 })
+  }
+
+  // Remote agents — proxy through Nelson file server
+  if (NELSON_AGENTS.has(agentId)) {
+    try {
+      const params = new URLSearchParams({ agent: agentId, path: filePath })
+      const upstream = await fetch(`${NELSON_FILE_SERVER}/download?${params}`, {
+        headers: { Authorization: `Bearer ${NELSON_TOKEN}` },
+        signal: AbortSignal.timeout(10000),
+      })
+      if (!upstream.ok) return NextResponse.json({ error: 'File not found on Nelson' }, { status: 404 })
+      const content = await upstream.arrayBuffer()
+      const contentType = upstream.headers.get('content-type') || 'application/octet-stream'
+      const fileName = path.basename(filePath)
+      return new NextResponse(content, {
+        headers: {
+          'Content-Type': contentType,
+          'Content-Disposition': `attachment; filename="${fileName}"`,
+        },
+      })
+    } catch {
+      return NextResponse.json({ error: 'Could not reach Nelson file server' }, { status: 503 })
+    }
   }
 
   const root = WORKSPACE_ROOTS[agentId]

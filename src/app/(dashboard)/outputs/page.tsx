@@ -57,12 +57,8 @@ function FileRow({ file }: { file: OutputFile }) {
   const isLocal = file.source === 'local'
 
   const handleDownload = () => {
-    if (isLocal) {
-      window.open(`/api/outputs/download?agent=${file.agentId}&path=${encodeURIComponent(file.path)}`, '_blank')
-    } else {
-      // Remote files — show path for now
-      alert(`Remote file: ${file.path}\nDownload via: \\\\Nelson\\...\\${file.path}`)
-    }
+    // Both local and remote files go through the download API (remote proxied via Nelson file server)
+    window.open(`/api/outputs/download?agent=${file.agentId}&path=${encodeURIComponent(file.path)}`, '_blank')
   }
 
   return (
@@ -118,14 +114,14 @@ function FileRow({ file }: { file: OutputFile }) {
           onClick={handleDownload}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
           style={{
-            background: isLocal ? 'rgba(96,165,250,0.1)' : 'rgba(100,116,139,0.1)',
-            color: isLocal ? '#60A5FA' : '#64748B',
-            border: `1px solid ${isLocal ? 'rgba(96,165,250,0.2)' : 'rgba(100,116,139,0.2)'}`,
+            background: 'rgba(96,165,250,0.1)',
+            color: '#60A5FA',
+            border: '1px solid rgba(96,165,250,0.2)',
           }}
-          title={isLocal ? 'Download' : 'Remote file — path shown'}
+          title="Download"
         >
           <Download size={12} />
-          {isLocal ? 'Download' : 'Path'}
+          Download
         </button>
       </div>
     </div>
