@@ -1,11 +1,24 @@
 // Agent types
-export type AgentName = 'nelson' | 'kitt' | 'woodhouse'
+export type AgentName = 'nelson' | 'kitt' | 'paul' | 'monty' | 'archer' | 'woodhouse'
+
+export type HostName = 'nelson' | 'kitt' | 'woodhouse'
+
+export interface HostConfig {
+  id: HostName
+  displayName: string
+  ip: string
+  gatewayUrl: string
+  token: string
+}
 
 export interface AgentConfig {
   id: AgentName
-  name: string
+  /** The agent ID as known to the gateway (e.g., 'main', 'paul', 'monty') */
+  agentId: string
   displayName: string
   color: string
+  emoji: string
+  host: HostName
   gatewayUrl: string
   token: string
 }
@@ -141,7 +154,7 @@ export interface TokenUsage {
 export interface CostSummary {
   totalTokens: number
   totalCost: number
-  byAgent: Record<AgentName, { tokens: number; cost: number }>
+  byAgent: Partial<Record<AgentName, { tokens: number; cost: number }>>
   byModel: Record<string, { tokens: number; cost: number }>
   byDay: Array<{ date: string; tokens: number; cost: number }>
 }

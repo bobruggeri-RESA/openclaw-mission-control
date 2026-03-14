@@ -11,12 +11,18 @@ import { AGENT_CONFIGS, AGENT_NAMES } from '@/config/agents'
 const AGENT_COLORS: Record<AgentName, string> = {
   nelson: '#60A5FA',
   kitt: '#34D399',
-  woodhouse: '#A78BFA',
+  paul: '#FBBF24',
+  monty: '#F87171',
+  archer: '#A78BFA',
+  woodhouse: '#94A3B8',
 }
 
 const AGENT_URLS: Record<AgentName, string> = {
-  nelson: 'http://127.0.0.1:18789',
+  nelson: 'http://192.168.7.6:18789',
   kitt: 'http://192.168.7.9:18789',
+  paul: 'http://192.168.7.9:18789',
+  monty: 'http://192.168.7.9:18789',
+  archer: 'http://192.168.7.9:18789',
   woodhouse: 'http://192.168.7.11:18789',
 }
 

@@ -33,12 +33,18 @@ const NAV_ITEMS = [
 const AGENT_COLORS: Record<AgentName, string> = {
   nelson: '#60A5FA',
   kitt: '#34D399',
-  woodhouse: '#A78BFA',
+  paul: '#FBBF24',
+  monty: '#F87171',
+  archer: '#A78BFA',
+  woodhouse: '#94A3B8',
 }
 
 const AGENTS: Array<{ id: AgentName; name: string }> = [
   { id: 'nelson', name: 'Nelson' },
   { id: 'kitt', name: 'Kitt' },
+  { id: 'paul', name: 'Paul' },
+  { id: 'monty', name: 'Monty' },
+  { id: 'archer', name: 'Archer' },
   { id: 'woodhouse', name: 'Woodhouse' },
 ]
 

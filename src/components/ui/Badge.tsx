@@ -22,7 +22,10 @@ const VARIANT_STYLES: Record<string, { bg: string; text: string; border: string 
 const AGENT_COLORS: Record<AgentName, string> = {
   nelson: 'blue',
   kitt: 'green',
-  woodhouse: 'purple',
+  paul: 'yellow',
+  monty: 'red',
+  archer: 'purple',
+  woodhouse: 'gray',
 }
 
 export function Badge({ children, variant = 'gray', agentId, size = 'md', style: styleProp }: BadgeProps) {

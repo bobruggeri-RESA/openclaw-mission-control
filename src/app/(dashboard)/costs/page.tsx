@@ -15,7 +15,10 @@ import { format, subDays, startOfDay } from 'date-fns'
 const AGENT_COLORS: Record<AgentName, string> = {
   nelson: '#60A5FA',
   kitt: '#34D399',
-  woodhouse: '#A78BFA',
+  paul: '#FBBF24',
+  monty: '#F87171',
+  archer: '#A78BFA',
+  woodhouse: '#94A3B8',
 }
 
 function StatCard({ title, value, subtitle, color, icon: Icon }: {

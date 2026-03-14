@@ -9,7 +9,7 @@ export class OpenClawClient {
   }
 
   async invoke<T = unknown>(tool: string, args: Record<string, unknown> = {}): Promise<T> {
-    const { gatewayUrl, token } = this.config
+    const { gatewayUrl, token, agentId } = this.config
 
     if (!gatewayUrl) {
       throw new Error(`No gateway URL configured for agent ${this.config.displayName}`)
@@ -25,7 +25,8 @@ export class OpenClawClient {
           'Content-Type': 'application/json',
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify({ tool, args }),
+        // Pass agentId so multi-agent gateways route to the right agent
+        body: JSON.stringify({ tool, args, agentId }),
         signal: controller.signal,
       })
 
