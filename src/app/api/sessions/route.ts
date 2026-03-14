@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { invokeAll, safeInvoke } from '@/lib/openclaw'
 import { AgentName, Session } from '@/lib/types'
+import { cachedFetch } from '@/lib/cache'
 
 interface SessionListResult {
   sessions?: Array<{
@@ -28,23 +29,7 @@ interface SessionMessagesResult {
   }
 }
 
-export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url)
-  const agentFilter = searchParams.get('agent') as AgentName | null
-  const sessionKey = searchParams.get('key')
-
-  // If fetching a specific session's messages
-  if (sessionKey && agentFilter) {
-    const { data, error } = await safeInvoke<SessionMessagesResult>(
-      agentFilter,
-      'session_get',
-      { key: sessionKey }
-    )
-    if (error) return NextResponse.json({ error }, { status: 500 })
-    return NextResponse.json({ session: data, agentId: agentFilter })
-  }
-
-  // List all sessions
+async function fetchSessions(agentFilter: AgentName | null) {
   const allResults = await invokeAll<SessionListResult>('sessions_list', {})
   const sessions: Session[] = []
 
@@ -74,8 +59,32 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // Sort by last activity descending
   sessions.sort((a, b) => (b.lastActivity || 0) - (a.lastActivity || 0))
+  return { sessions, total: sessions.length, timestamp: Date.now() }
+}
 
-  return NextResponse.json({ sessions, total: sessions.length, timestamp: Date.now() })
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url)
+  const agentFilter = searchParams.get('agent') as AgentName | null
+  const sessionKey = searchParams.get('key')
+  const live = searchParams.get('live') === 'true'
+
+  // Specific session messages are always live (never cached)
+  if (sessionKey && agentFilter) {
+    const { data, error } = await safeInvoke<SessionMessagesResult>(
+      agentFilter,
+      'session_get',
+      { key: sessionKey }
+    )
+    if (error) return NextResponse.json({ error }, { status: 500 })
+    return NextResponse.json({ session: data, agentId: agentFilter })
+  }
+
+  const cacheKey = agentFilter ? `sessions_${agentFilter}` : 'sessions_all'
+  const { data, fromCache, cachedAt } = await cachedFetch(
+    cacheKey,
+    () => fetchSessions(agentFilter),
+    { live }
+  )
+  return NextResponse.json({ ...data, fromCache, cachedAt })
 }

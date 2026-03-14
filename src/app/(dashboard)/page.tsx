@@ -8,6 +8,7 @@ import { CardSkeleton } from '@/components/ui/LoadingSkeleton'
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 import { formatDistanceToNow } from 'date-fns'
 import { AGENT_CONFIGS } from '@/config/agents'
+import { useLiveMode, liveUrl } from '@/lib/liveMode'
 
 const AGENT_COLORS: Record<string, string> = {
   nelson: '#60A5FA',
@@ -173,24 +174,29 @@ export default function DashboardPage() {
   const [cronJobs, setCronJobs] = useState<CronJob[]>([])
   const [loading, setLoading] = useState(true)
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date())
+  const [fromCache, setFromCache] = useState(false)
+  const { live } = useLiveMode()
 
   const fetchData = useCallback(async () => {
     setLoading(true)
     try {
       const [agentsRes, sessionsRes, cronRes] = await Promise.allSettled([
-        fetch('/api/agents').then((r) => r.json()),
-        fetch('/api/sessions').then((r) => r.json()),
-        fetch('/api/cron').then((r) => r.json()),
+        fetch(liveUrl('/api/agents', live)).then((r) => r.json()),
+        fetch(liveUrl('/api/sessions', live)).then((r) => r.json()),
+        fetch(liveUrl('/api/cron', live)).then((r) => r.json()),
       ])
 
-      if (agentsRes.status === 'fulfilled') setAgents(agentsRes.value.agents || [])
+      if (agentsRes.status === 'fulfilled') {
+        setAgents(agentsRes.value.agents || [])
+        setFromCache(agentsRes.value.fromCache ?? false)
+      }
       if (sessionsRes.status === 'fulfilled') setSessions(sessionsRes.value.sessions || [])
       if (cronRes.status === 'fulfilled') setCronJobs(cronRes.value.jobs || [])
       setLastRefresh(new Date())
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [live])
 
   useEffect(() => {
     fetchData()
@@ -234,6 +240,12 @@ export default function DashboardPage() {
               {onlineAgents}/{agents.length} agents online
             </p>
           </div>
+          <div className="flex items-center gap-2">
+            {fromCache && !live && (
+              <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(251,191,36,0.15)', color: '#FBBF24', border: '1px solid rgba(251,191,36,0.3)' }}>
+                cached
+              </span>
+            )}
           <button
             onClick={fetchData}
             disabled={loading}
@@ -247,6 +259,7 @@ export default function DashboardPage() {
             <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
             {loading ? 'Loading...' : `Refreshed ${formatDistanceToNow(lastRefresh, { addSuffix: true })}`}
           </button>
+          </div>
         </div>
 
         {/* Stats */}

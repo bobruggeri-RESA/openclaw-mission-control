@@ -6,9 +6,10 @@ import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, Users, Activity, Clock, Brain,
   DollarSign, Search, Settings, ListTodo, Radio,
-  LogOut, Zap, Globe
+  LogOut, Zap, Globe, Wifi, WifiOff
 } from 'lucide-react'
 import { AgentName } from '@/lib/types'
+import { useLiveMode } from '@/lib/liveMode'
 
 interface AgentHealth {
   agentId: AgentName
@@ -51,6 +52,7 @@ const AGENTS: Array<{ id: AgentName; name: string }> = [
 
 export function TopBar() {
   const pathname = usePathname()
+  const { live, toggle } = useLiveMode()
   const [agentHealth, setAgentHealth] = useState<AgentHealth[]>(
     AGENTS.map((a) => ({ agentId: a.id, name: a.name, online: false, color: AGENT_COLORS[a.id] }))
   )
@@ -146,10 +148,25 @@ export function TopBar() {
         ))}
       </div>
 
+      {/* Live/Cached toggle */}
+      <button
+        onClick={toggle}
+        className="ml-2 flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition-all"
+        style={{
+          background: live ? 'rgba(52,211,153,0.15)' : 'rgba(100,116,139,0.15)',
+          color: live ? '#34D399' : '#64748B',
+          border: `1px solid ${live ? 'rgba(52,211,153,0.3)' : 'rgba(100,116,139,0.2)'}`,
+        }}
+        title={live ? 'Live mode — click for cached' : 'Cached mode — click for live'}
+      >
+        {live ? <Wifi size={13} /> : <WifiOff size={13} />}
+        <span className="hidden sm:block">{live ? 'Live' : 'Cached'}</span>
+      </button>
+
       {/* Logout */}
       <button
         onClick={handleLogout}
-        className="ml-2 p-2 rounded-lg transition-colors"
+        className="ml-1 p-2 rounded-lg transition-colors"
         style={{ color: '#64748B' }}
         title="Logout"
       >

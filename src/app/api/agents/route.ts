@@ -1,7 +1,8 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { invokeAll } from '@/lib/openclaw'
 import { AgentName, AgentStatus } from '@/lib/types'
 import { AGENT_CONFIGS } from '@/config/agents'
+import { cachedFetch } from '@/lib/cache'
 
 interface SessionStatusResult {
   session?: string
@@ -13,12 +14,10 @@ interface SessionStatusResult {
   token_usage?: number
 }
 
-export async function GET() {
+async function fetchAgents() {
   const results = await invokeAll<SessionStatusResult>('session_status', {})
-
   const agents: AgentStatus[] = results.map((result) => {
     const config = AGENT_CONFIGS[result.agentId as AgentName]
-
     if (result.error || !result.data) {
       return {
         agentId: result.agentId as AgentName,
@@ -28,7 +27,6 @@ export async function GET() {
         lastSeen: undefined,
       }
     }
-
     const data = result.data
     return {
       agentId: result.agentId as AgentName,
@@ -44,6 +42,11 @@ export async function GET() {
       color: config?.color,
     }
   })
+  return { agents, timestamp: Date.now() }
+}
 
-  return NextResponse.json({ agents, timestamp: Date.now() })
+export async function GET(request: NextRequest) {
+  const live = request.nextUrl.searchParams.get('live') === 'true'
+  const { data, fromCache, cachedAt } = await cachedFetch('agents', fetchAgents, { live })
+  return NextResponse.json({ ...data, fromCache, cachedAt })
 }
