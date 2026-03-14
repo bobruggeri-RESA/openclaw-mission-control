@@ -6,7 +6,7 @@ export const HOST_CONFIGS: Record<HostName, Omit<HostConfig, 'gatewayUrl' | 'tok
     id: 'nelson',
     displayName: 'Nelson',
     ip: '192.168.7.6',
-    agents: ['nelson', 'kitt', 'paul'],
+    agents: ['nelson', 'kitt', 'paul', 'terry'],
     sharedFolders: ['\\\\Nelson\\OpenClawSkills', '\\\\Nelson\\OpenClawKnowledge'],
   },
   kitt: {
@@ -100,9 +100,18 @@ export const AGENT_CONFIGS: Record<AgentName, Omit<AgentConfig, 'gatewayUrl' | '
     host: 'woodhouse',
     instances: { woodhouse: 'main' },
   },
+  terry: {
+    id: 'terry',
+    agentId: 'terry',
+    displayName: 'Terry',
+    color: '#FB923C',  // orange
+    emoji: '🧪',
+    host: 'nelson',
+    instances: { nelson: 'terry' },
+  },
 }
 
-export const AGENT_NAMES: AgentName[] = ['nelson', 'kitt', 'paul', 'monty', 'archer', 'woodhouse']
+export const AGENT_NAMES: AgentName[] = ['nelson', 'kitt', 'paul', 'monty', 'archer', 'woodhouse', 'terry']
 
 export function getAgentConfigs(): AgentConfig[] {
   return AGENT_NAMES.map((id) => {

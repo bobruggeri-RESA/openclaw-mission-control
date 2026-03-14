@@ -4,7 +4,7 @@ import { AgentName } from '@/lib/types'
 
 interface BadgeProps {
   children: React.ReactNode
-  variant?: 'blue' | 'green' | 'purple' | 'red' | 'yellow' | 'gray' | 'agent'
+  variant?: 'blue' | 'green' | 'purple' | 'red' | 'yellow' | 'gray' | 'orange' | 'agent'
   agentId?: AgentName
   size?: 'sm' | 'md'
   style?: React.CSSProperties
@@ -17,6 +17,7 @@ const VARIANT_STYLES: Record<string, { bg: string; text: string; border: string 
   red: { bg: 'rgba(248,113,113,0.15)', text: '#F87171', border: 'rgba(248,113,113,0.3)' },
   yellow: { bg: 'rgba(251,191,36,0.15)', text: '#FBBF24', border: 'rgba(251,191,36,0.3)' },
   gray: { bg: 'rgba(100,116,139,0.15)', text: '#94A3B8', border: 'rgba(100,116,139,0.3)' },
+  orange: { bg: 'rgba(251,146,60,0.15)', text: '#FB923C', border: 'rgba(251,146,60,0.3)' },
 }
 
 const AGENT_COLORS: Record<AgentName, string> = {
@@ -26,6 +27,7 @@ const AGENT_COLORS: Record<AgentName, string> = {
   monty: 'red',
   archer: 'purple',
   woodhouse: 'gray',
+  terry: 'orange',
 }
 
 export function Badge({ children, variant = 'gray', agentId, size = 'md', style: styleProp }: BadgeProps) {

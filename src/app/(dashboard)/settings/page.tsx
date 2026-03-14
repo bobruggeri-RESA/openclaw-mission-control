@@ -15,6 +15,7 @@ const AGENT_COLORS: Record<AgentName, string> = {
   monty: '#F87171',
   archer: '#A78BFA',
   woodhouse: '#94A3B8',
+  terry: '#FB923C',
 }
 
 const AGENT_URLS: Record<AgentName, string> = {
@@ -24,6 +25,7 @@ const AGENT_URLS: Record<AgentName, string> = {
   monty: 'http://192.168.7.9:18789',
   archer: 'http://192.168.7.9:18789',
   woodhouse: 'http://192.168.7.11:18789',
+  terry: 'http://192.168.7.6:18789',
 }
 
 function AgentConfigCard({ agentId }: { agentId: AgentName }) {

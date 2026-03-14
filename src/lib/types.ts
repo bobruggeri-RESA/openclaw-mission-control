@@ -1,5 +1,5 @@
 // Agent types
-export type AgentName = 'nelson' | 'kitt' | 'paul' | 'monty' | 'archer' | 'woodhouse'
+export type AgentName = 'nelson' | 'kitt' | 'paul' | 'monty' | 'archer' | 'woodhouse' | 'terry'
 
 export type HostName = 'nelson' | 'kitt' | 'woodhouse'
 

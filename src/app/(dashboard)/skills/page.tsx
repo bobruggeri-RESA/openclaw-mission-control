@@ -47,6 +47,7 @@ const AGENT_COLORS: Record<AgentName, string> = {
   monty: '#F87171',
   archer: '#A78BFA',
   woodhouse: '#94A3B8',
+  terry: '#FB923C',
 }
 
 const EXT_COLORS: Record<string, string> = {
