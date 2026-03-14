@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, Users, Activity, Clock, Brain,
   DollarSign, Search, Settings, ListTodo, Radio,
-  LogOut, Zap
+  LogOut, Zap, Globe
 } from 'lucide-react'
 import { AgentName } from '@/lib/types'
 
@@ -27,6 +27,7 @@ const NAV_ITEMS = [
   { href: '/tasks', label: 'Tasks', icon: ListTodo },
   { href: '/costs', label: 'Costs', icon: DollarSign },
   { href: '/search', label: 'Search', icon: Search },
+  { href: '/skills', label: 'Skills', icon: Globe },
   { href: '/settings', label: 'Settings', icon: Settings },
 ]
 
