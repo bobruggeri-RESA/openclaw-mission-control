@@ -1,12 +1,13 @@
 import { AgentConfig, AgentName, HostConfig, HostName } from '@/lib/types'
 
 // Physical hosts — each has one gateway
-export const HOST_CONFIGS: Record<HostName, Omit<HostConfig, 'gatewayUrl' | 'token'> & { agents: AgentName[] }> = {
+export const HOST_CONFIGS: Record<HostName, Omit<HostConfig, 'gatewayUrl' | 'token'> & { agents: AgentName[]; sharedFolders?: string[] }> = {
   nelson: {
     id: 'nelson',
     displayName: 'Nelson',
     ip: '192.168.7.6',
     agents: ['nelson', 'kitt', 'paul'],
+    sharedFolders: ['\\\\Nelson\\OpenClawSkills', '\\\\Nelson\\OpenClawKnowledge'],
   },
   kitt: {
     id: 'kitt',
