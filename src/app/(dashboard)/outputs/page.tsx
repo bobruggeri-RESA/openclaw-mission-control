@@ -209,7 +209,7 @@ function OutputsContent() {
           style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', color: '#E2E8F0' }}
         >
           <option value="all">All Agents</option>
-          {AGENT_NAMES.map(id => (
+          {[...AGENT_NAMES].sort((a, b) => AGENT_CONFIGS[a].displayName.localeCompare(AGENT_CONFIGS[b].displayName)).map(id => (
             <option key={id} value={id}>{AGENT_CONFIGS[id].displayName}</option>
           ))}
         </select>
