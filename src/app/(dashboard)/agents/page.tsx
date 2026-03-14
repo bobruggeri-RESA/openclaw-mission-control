@@ -17,6 +17,7 @@ const AGENT_COLORS: Record<AgentName, string> = {
   archer: '#A78BFA',
   woodhouse: '#94A3B8',
   terry: '#FB923C',
+  reacher: '#10B981',
 }
 
 function AgentDetailCard({ agent }: { agent: AgentStatus }) {

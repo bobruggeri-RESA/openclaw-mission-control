@@ -28,6 +28,7 @@ const AGENT_COLORS: Record<AgentName, string> = {
   archer: 'purple',
   woodhouse: 'gray',
   terry: 'orange',
+  reacher: 'green',
 }
 
 export function Badge({ children, variant = 'gray', agentId, size = 'md', style: styleProp }: BadgeProps) {
