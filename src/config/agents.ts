@@ -1,25 +1,28 @@
 import { AgentConfig, AgentName, HostConfig, HostName } from '@/lib/types'
 
 // Physical hosts — each has one gateway
-export const HOST_CONFIGS: Record<HostName, Omit<HostConfig, 'gatewayUrl' | 'token'>> = {
+export const HOST_CONFIGS: Record<HostName, Omit<HostConfig, 'gatewayUrl' | 'token'> & { agents: AgentName[] }> = {
   nelson: {
     id: 'nelson',
     displayName: 'Nelson',
     ip: '192.168.7.6',
+    agents: ['nelson', 'kitt', 'paul'],
   },
   kitt: {
     id: 'kitt',
     displayName: 'Kitt',
     ip: '192.168.7.9',
+    agents: ['kitt', 'archer', 'monty', 'paul'],
   },
   woodhouse: {
     id: 'woodhouse',
     displayName: 'Woodhouse',
     ip: '192.168.7.11',
+    agents: ['woodhouse'],
   },
 }
 
-export function getHostConfigs(): HostConfig[] {
+export function getHostConfigs(): (HostConfig & { agents: AgentName[] })[] {
   return (Object.keys(HOST_CONFIGS) as HostName[]).map((id) => ({
     ...HOST_CONFIGS[id],
     gatewayUrl: process.env[`${id.toUpperCase()}_GATEWAY_URL`] || '',
@@ -27,55 +30,74 @@ export function getHostConfigs(): HostConfig[] {
   }))
 }
 
-// All agents — some share a host/gateway, but have distinct agent IDs on that gateway
-export const AGENT_CONFIGS: Record<AgentName, Omit<AgentConfig, 'gatewayUrl' | 'token'>> = {
+/**
+ * Agent definitions.
+ * Some agents (Kitt, Paul) exist on multiple hosts/gateways.
+ * `instances` maps each host they live on to the agentId within that gateway.
+ * `primaryHost` is the one we query by default.
+ */
+export const AGENT_CONFIGS: Record<AgentName, Omit<AgentConfig, 'gatewayUrl' | 'token'> & {
+  instances: Partial<Record<HostName, string>>
+}> = {
   nelson: {
     id: 'nelson',
-    agentId: 'main',        // agent ID within its gateway
+    agentId: 'main',
     displayName: 'Nelson',
-    color: '#60A5FA',       // blue
+    color: '#60A5FA',  // blue
     emoji: '🫡',
     host: 'nelson',
+    instances: { nelson: 'main' },
   },
   kitt: {
     id: 'kitt',
     agentId: 'main',
     displayName: 'Kitt',
-    color: '#34D399',       // green
+    color: '#34D399',  // green
     emoji: '🚗',
-    host: 'kitt',
+    host: 'kitt',      // primary host
+    instances: {
+      nelson: 'kitt',  // also accessible via Nelson gateway
+      kitt: 'main',    // main agent on Kitt gateway
+    },
   },
   paul: {
     id: 'paul',
     agentId: 'paul',
     displayName: 'Paul',
-    color: '#FBBF24',       // yellow
+    color: '#FBBF24',  // yellow
     emoji: '🎸',
-    host: 'kitt',
+    host: 'kitt',      // primary host
+    instances: {
+      nelson: 'paul',  // also on Nelson gateway
+      kitt: 'paul',    // also on Kitt gateway
+    },
   },
   monty: {
     id: 'monty',
     agentId: 'monty',
     displayName: 'Monty',
-    color: '#F87171',       // red
+    color: '#F87171',  // red
     emoji: '🏰',
     host: 'kitt',
+    instances: { kitt: 'monty' },
   },
   archer: {
     id: 'archer',
     agentId: 'archer',
     displayName: 'Archer',
-    color: '#A78BFA',       // purple
+    color: '#A78BFA',  // purple
     emoji: '🎯',
     host: 'kitt',
+    instances: { kitt: 'archer' },
   },
   woodhouse: {
     id: 'woodhouse',
     agentId: 'main',
     displayName: 'Woodhouse',
-    color: '#94A3B8',       // slate
+    color: '#94A3B8',  // slate
     emoji: '🧹',
     host: 'woodhouse',
+    instances: { woodhouse: 'main' },
   },
 }
 
